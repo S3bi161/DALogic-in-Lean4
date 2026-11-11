@@ -24,6 +24,11 @@ def eval (M: KripkeModel RelType AtomType State) :
   | DLForm.imp φ ψ, s => eval M φ s → eval M ψ s
   | DLForm.diamond α φ, s => ∃ s', evalRel M α s s' ∧ eval M φ s'
 
+#check Relation.ReflTransGen
+
+def reachable (M: KripkeModel RelType AtomType State) (s₀ s₁: State) : Prop :=
+  Relation.ReflTransGen (λ s t ↦ ∃ a, M.rel a s t) s₀ s₁
+
 @[simp] theorem eval_conj_iff
   (M: KripkeModel RelType AtomType State)
   (φ ψ: DLForm RelType AtomType)

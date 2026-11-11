@@ -32,8 +32,8 @@ theorem ato_imp_wild (M: KripkeModel RelType AtomType State) (a: RelType) (s s':
   evalRel M (Relation.relAtom a) s s' → evalRel M Relation.wild s s' :=
   by
   intro h
-  simp[evalRel] at h
-  simp[evalRel]
+  change M.rel a s s' at h
+  change ∃ b, M.rel b s s'
   exact ⟨a, h⟩
 
 -- transition s -> s' with wildcard implies there exist atomic rel with s -> s'

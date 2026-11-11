@@ -18,7 +18,7 @@ inductive TCond : Type
 deriving DecidableEq, BEq
 
 -- temporary new DAForm to include @fn
-abbrev TDAForm := DLForm DynIndex TCond
+abbrev TDAForm := DLForm DynIndexSym TCond
 
 
 inductive Sign : Type

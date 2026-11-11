@@ -4,62 +4,26 @@ namespace Logic.DL
 
 theorem rel_iff
   (e: Execution)
-  (s s': DynIndex):
+  (s s': CFTrace.State e.liberal.cft):
 
   (executionModel e).rel (DL.DynIndexSym.line i) s s' ↔
-  s ∈ e.liberal.cft.Q ∧
-  s' = s ∘ᵢ i ∧
-  s' ∈ e.liberal.cft.Q := by
+  s'.val = DynIndex.cons s.val (DynIndexSym.line i) := by
+    rfl
 
-    simp[executionModel]
-    intro hSInQ
-    constructor
-    · intro h
-      constructor
-      · exact h.right
-      · exact h.left
-    · intro h
-      constructor
-      · exact h.right
-      · exact h.left
 
 /- The kripke model execution model induced by an execution e is always non-branching-/
-theorem rel_non_branching_line
+
+theorem rel_non_branching
   (e: Execution)
-  (s t₁ t₂: DynIndex)
-  (h₁: (executionModel e).rel (DL.DynIndexSym.line i) s t₁)
-  (h₂: (executionModel e).rel (DL.DynIndexSym.line i) s t₂):
-
-  t₁ = t₂ := by
-
-    simp[executionModel] at *
-    rw[h₁.right.right]
-    rw[h₂.right.right]
-
-theorem rel_non_branching_dollar
-  (e: Execution)
-  (s t₁ t₂: DynIndex)
-  (h₁: (executionModel e).rel $ s t₁)
-  (h₂: (executionModel e).rel $ s t₂):
-
-  t₁ = t₂ := by
-
-    simp[executionModel] at *
-    rw[h₁.right.right]
-    rw[h₂.right.right]
-
-theorem rel_non_branching_hash
-  (e: Execution)
-  (s t₁ t₂: DynIndex)
-  (h₁: (executionModel e).rel # s t₁)
-  (h₂: (executionModel e).rel # s t₂):
-
-  t₁ = t₂ := by
-
-    simp[executionModel] at *
-    rw[h₁.right.right]
-    rw[h₂.right.right]
-
+  (a: DynIndexSym)
+  (s t₁ t₂: CFTrace.State e.liberal.cft)
+  (h₁ : (executionModel e).rel a s t₁)
+  (h₂ : (executionModel e).rel a s t₂):
+    t₁ = t₂ := by
+      change t₁.val = DynIndex.cons s.val a at h₁
+      change t₂.val = DynIndex.cons s.val a at h₂
+      apply Subtype.ext
+      exact h₁.trans h₂.symm
 
 
 theorem model_non_branching
@@ -70,10 +34,17 @@ theorem model_non_branching
     intro s t₁ t₂
     intro h₁
     intro h₂
-    cases relAtom with
-    | line i => exact rel_non_branching_line e s t₁ t₂ h₁ h₂
-    | dollar => exact rel_non_branching_dollar e s t₁ t₂ h₁ h₂
-    | hash => exact rel_non_branching_hash e s t₁ t₂ h₁ h₂
+    exact rel_non_branching e relAtom s t₁ t₂ h₁ h₂
 
+
+def extendModel (M: KripkeModel RelType AtomType State):
+  KripkeModel RelType AtomType (Sum State Unit) where
+    val := λ atom s ↦ match s with
+                        | Sum.inl old_state => M.val atom old_state
+                        | Sum.inr () => False
+    rel := λ atomic_rel s s' ↦
+                      match s, s' with
+                        | Sum.inl old_state, Sum.inl old_state' => M.rel atomic_rel old_state old_state'
+                        | _, _ => False
 
 end Logic.DL

@@ -54,7 +54,7 @@ def wellFormedArgs (args: List Arg) : Prop :=
 inductive Stmt: Type
   | call: Expr → List Arg → Stmt     --`call INT_PROC_ID (args*)`
   | assign: Var → Expr → Expr → Stmt --assignment `v[e₀] = e₁`
-  | returnIf: Expr → Stmt            --conditional return `if e₀ return`
+  | returnIf: Cond → Stmt            --conditional return `if c return`
   | repeat: Stmt                     --`repeat` statement present at the end of every procedure
 deriving DecidableEq, BEq
 
@@ -75,7 +75,10 @@ def endsWithRepeat : List LStmt → Prop
   | _ :: stmts_tail => endsWithRepeat stmts_tail
 
 def wellFormedProc (p: Proc) : Prop :=
-  endsWithRepeat p.body
+  (endsWithRepeat p.body) ∧
+  (∀ call ∈ p.body, match call.stmt with
+                      | .call _ args  => noDuplicateRefs args
+                      | _             => True)
 
 --Programs are just lists of procedures
 abbrev Program := Int → Option Proc   --may be undefined

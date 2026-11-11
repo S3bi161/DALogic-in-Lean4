@@ -21,12 +21,12 @@ deriving DecidableEq
 /- The evaluation for the temporal extension keeps the default evaluation of an evaluation symbol.
 It is extended to evaluate `next` using `nextState`-/
 def executionModelNext (e: Execution) :
-  KripkeModel RelAtomTemporal Cond DynIndex where
+  KripkeModel RelAtomTemporal Cond (CFTrace.State e.liberal.cft) where
     val := (executionModel e).val
     rel := λ a s₁ s₂ ↦
       match a with
         | .dyn i => (executionModel e).rel i s₁ s₂
-        | .next => nextState e.liberal.cft s₁ s₂
+        | .next => nextState e.liberal.cft s₁.val s₂.val
 
 -- `X φ = ⟨next⟩ φ`
 def X (φ: DLForm RelAtomTemporal Cond): DLForm RelAtomTemporal Cond :=

@@ -62,9 +62,7 @@ example : eval M ψ State.s₀ := by
   use State.s₂
   constructor
   · use State.s₁
-  · intro hp
-    intro hq
-    aesop
+  · aesop
 
 -- two arbitrary atomic steps lead to s₂
 example : evalRel M (Relation.comp (Relation.wild) (Relation.wild)) State.s₀ State.s₂ := by
@@ -75,85 +73,3 @@ example : evalRel M (Relation.comp (Relation.wild) (Relation.wild)) State.s₀ S
   · use RelAtom.b
 
 end GenericKripke
-
-
-namespace Logic.DL
-
-/- # Execution Model -/
-def testQ := [ε, ε ∘ᵢ ι 0, (ε ∘ᵢ ι 0) ∘ᵢ #]
-def dummyProc : Proc := {
-  id := 0,
-  params := [],
-  body := []
-}
-def testCFT : CFTrace := {
-  Q := testQ,
-  prompt := Stmt.call (Expr.const 0) [],
-  tar := λ _ ↦ some dummyProc
-}
-
-def testSeed : DynIndex → Var → Int → Int :=
-  λ _ _ _ ↦ 0
-
-def testVal : DynIndex → Var → Int → Int :=
-  λ _ _ _ ↦ 0
-
-def testExec : Execution := {
-  liberal := {
-    cft := testCFT,
-    seed := testSeed
-  },
-  val := testVal,
-  hCFT := by sorry,
-  hVal := by sorry,
-  hExec := by sorry
-}
-
-def M := executionModel testExec
-
-example : M.rel (0) ε (ε ∘ᵢ ι 0) := by
-  simp[M, executionModel]
-  constructor
-  · constructor
-  · right
-    left
-
-example : Logic.DL.evalRel M
-                 (0 ∘ₗ #)
-                  ε
-                  ((ε ∘ᵢ ι 0) ∘ᵢ #) := by
-  simp[Logic.DL.evalRel]
-  use  (ε ∘ᵢ (ι 0))
-  simp[M, executionModel]
-  constructor
-  · constructor
-    · constructor
-    · right
-      left
-  · constructor
-    · right
-      left
-    · right
-      right
-      constructor
-
-def φ : DAForm := ⟨0 ∪ 1*⟩ₗ "e" =ₑ "e"
-
-example : Logic.DL.eval M φ ε := by
-  simp[Logic.DL.eval, φ, M]
-  use (ε ∘ᵢ ι 0)
-  simp[Logic.DL.evalRel]
-  simp[executionModel]
-  constructor
-  · constructor
-    constructor
-    · left
-    · right
-      left
-  · constructor
-    · right
-      left
-    · unfold evalCond
-      rfl
-
-end Logic.DL

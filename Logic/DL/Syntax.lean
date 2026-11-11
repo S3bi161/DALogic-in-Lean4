@@ -10,7 +10,7 @@ inductive Relation (RelType: Type) : Type
 deriving DecidableEq, BEq
 
 inductive DLForm (RelType AtomType: Type) : Type
-  | atom : AtomType → DLForm RelType AtomType -- atomic propositions modelled as strings
+  | atom : AtomType → DLForm RelType AtomType
   | falsum : DLForm RelType AtomType -- falsum ⊥
   | imp : DLForm RelType AtomType → DLForm RelType AtomType → DLForm RelType AtomType -- implication φ → ψ
   | diamond : Relation RelType → DLForm RelType AtomType → DLForm RelType AtomType -- diamond ⟨α⟩φ
